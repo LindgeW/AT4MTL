@@ -2,7 +2,7 @@
 Adversarial Training for Multi-Task Learning
 ![at4mtl](img/at4mtl.png)
 Note: 
-both share and private models are based on CNN, and the following table presents the average error rates on 16 datasets across different MTL architectures.
+both share and private models are based on CNN, and the following table presents the average error rates on 16 datasets across different MTL architectures above.
 
 | Type | (a) | (b) | (c) |
 | ---- | ---- | ---- | ---- |
