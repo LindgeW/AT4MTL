@@ -1,0 +1,4 @@
+{
+  "dataset": "mtl_data",
+  "embed_weights": "./embeddings/glove.6B.200d.txt"
+}
