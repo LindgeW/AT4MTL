@@ -99,10 +99,10 @@ class Trainer(object):
             batch = batch_variable(batcher, self.wd_vocab)
             batch.to_device(self.args.device)
             adv_lmbd = self.lambda_(step, total_step)
-            task_logits, share_logits = self.model(task_id, batch.wd_ids, adv_lmbd)
+            task_logits, share_logits, diff_loss = self.model(task_id, batch.wd_ids, adv_lmbd)
             loss_task = F.cross_entropy(task_logits, batch.lbl_ids)
             loss_share = F.cross_entropy(share_logits, batch.task_ids)
-            loss = loss_task + self.args.adv_loss_w * loss_share
+            loss = loss_task + self.args.adv_loss_w * loss_share + self.args.diff_loss_w * diff_loss
             loss.backward()
             nn_utils.clip_grad_norm_(filter(lambda p: p.requires_grad, self.model.parameters()),
                                      max_norm=args.grad_clip)
@@ -128,7 +128,7 @@ class Trainer(object):
             for i, batcher in enumerate(test_loader):
                 batch = batch_variable(batcher, self.wd_vocab)
                 batch.to_device(self.args.device)
-                task_logits, share_logits = self.model(task_id, batch.wd_ids)
+                task_logits, share_logits, _ = self.model(task_id, batch.wd_ids)
                 nb_correct += (task_logits.data.argmax(dim=-1) == batch.lbl_ids).sum().item()
                 nb_total += len(batch.lbl_ids)
         acc = nb_correct / nb_total

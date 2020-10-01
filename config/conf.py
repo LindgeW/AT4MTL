@@ -37,6 +37,7 @@ def args_config():
     parse.add_argument('--adv_share', action='store_true', default=False, help='using adversarial sharing or not ?')
     parse.add_argument('--share', action='store_true', default=False, help='using conventional sharing or not ?')
     parse.add_argument("--adv_loss_w", type=float, default=0.05, help='adversarial loss weight')
+    parse.add_argument("--diff_loss_w", type=float, default=0.01, help='orthogonality constraints loss weight')
 
     parse.add_argument("--bert_lr", type=float, default=2e-5, help='bert learning rate')
     parse.add_argument("--bert_layers", type=int, default=4, help='the number of last bert layers')

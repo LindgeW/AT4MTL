@@ -55,9 +55,18 @@ class ATClassifier(nn.Module):
         task_input_size = (2 if self.adv_share or self.share else 1) * args.hidden_size
         self.task_fcs = nn.ModuleList([nn.Linear(task_input_size, 2) for _ in range(self.nb_task)])
 
+    def diff_loss(self, share_h, task_h):
+        share_h = F.normalize(share_h - torch.mean(share_h, 0))
+        task_h = F.normalize(task_h - torch.mean(task_h, 0))
+        dot_mat = torch.matmul(share_h, task_h.transpose(0, 1))
+        return torch.sum(dot_mat ** 2)
+        # return torch.norm(dot_mat) ** 2
+
     def task_sp(self, task_id, h, adv_lmbd=0.01):
         task_h = self.task_encs[task_id](h)
         share_h = self.share_enc(h)
+
+        diff_loss = self.diff_loss(share_h, task_h)
 
         if self.adv_share:
             h_out = torch.cat((share_h, task_h), dim=1).contiguous()
@@ -70,12 +79,12 @@ class ATClassifier(nn.Module):
         h_out = F.dropout(h_out, p=self.dropout, training=self.training)
         task_logits = self.task_fcs[task_id](h_out)
         share_logits = self.share_fc(share_h)
-        return task_logits, share_logits
+        return task_logits, share_logits, diff_loss
 
     def forward(self, task_id, inp, adv_lmbd=0.01):
         embed = self.word_embedding(inp)
-        task_logits, share_logits = self.task_sp(task_id, embed, adv_lmbd)
-        return task_logits, share_logits
+        task_logits, share_logits, diff_loss = self.task_sp(task_id, embed, adv_lmbd)
+        return task_logits, share_logits, diff_loss
 
 
 
